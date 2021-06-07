@@ -21,9 +21,11 @@ function App() {
       method: "POST",
       body: JSON.stringify({
         $limit: 50,
-        $select: "distinct title",
+        $select: "distinct title, sum(checkouts)",
         $where: `materialtype='BOOK'`,
-        $q: `${searchString}`,
+        $q: `${escapeSoQL(searchString)}`,
+        $group: "title",
+        $order: "sum_checkouts DESC",
       }),
     });
     const names = await res.json();
@@ -57,7 +59,7 @@ function App() {
         getBookNames(inputValue).then((options) => callback(options));
     }, 500),
     []
-  );
+  ); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (newValue) => {
     setInputValue(newValue);
