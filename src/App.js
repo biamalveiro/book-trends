@@ -4,7 +4,8 @@ import { debounce, isEmpty } from "lodash";
 
 import "./App.scss";
 
-import BookLineChart from "./BookLineChart";
+import BookBarChart from "./BookBarChart";
+import Tops from "./Tops";
 
 const escapeSoQL = (queryString) => {
   return queryString.replace("'", "''");
@@ -13,10 +14,8 @@ const escapeSoQL = (queryString) => {
 function App() {
   const [inputValue, setInputValue] = useState("");
   const [bookData, setBookData] = useState([]);
-  const [bookTitle, setBookTitle] = useState("");
 
   const getBookNames = async (searchString) => {
-    console.log(searchString);
     const res = await fetch("/api/books", {
       method: "POST",
       body: JSON.stringify({
@@ -35,7 +34,6 @@ function App() {
   };
 
   const getBookData = async (book) => {
-    console.log(book);
     const res = await fetch("/api/books", {
       method: "POST",
       body: JSON.stringify({
@@ -48,7 +46,6 @@ function App() {
 
   useEffect(() => {
     if (!isEmpty(inputValue)) {
-      setBookTitle(inputValue.value);
       getBookData(inputValue.value);
     }
   }, [inputValue]);
@@ -59,7 +56,7 @@ function App() {
         getBookNames(inputValue).then((options) => callback(options));
     }, 500),
     []
-  ); // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const handleChange = (newValue) => {
     setInputValue(newValue);
@@ -70,16 +67,17 @@ function App() {
       <header className="text-center py-10">
         <h1 className="text-3xl font-semibold grey">Book Trends 📚</h1>
       </header>
-      <div className="w-2/4 mx-auto">
+      <div className="w-2/4 mx-auto my-10">
         <AsyncSelect
           loadOptions={loadOptions}
           onChange={handleChange}
           isSearchable
           placeholder="Search for a book..."
         />
-        {!isEmpty(bookData) ? (
-          <BookLineChart data={bookData} title={bookTitle} />
-        ) : null}
+        {!isEmpty(bookData) ? <BookBarChart data={bookData} /> : null}
+      </div>
+      <div className="w-3/4 mx-auto">
+        <Tops getBookData={getBookData} />
       </div>
     </div>
   );
